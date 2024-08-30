@@ -1,6 +1,4 @@
-#Construct a simple Portfolio class that has a collection of Stocks and a “Profit” method that receives 2 dates and returns the profit of the Portfolio between those dates. Assume each Stock has a “Price” method that receives a date and returns its price. 
-
-import datetime
+from datetime import datetime
 import yfinance as yf
 
 def check_stock_exists(stock):
@@ -20,7 +18,7 @@ def check_date(date):
     """
 
     try:
-        datetime.datetime.strptime(date, "%Y-%m-%d")
+        datetime.strptime(date, "%Y-%m-%d")
         return True
     except:
         return False
@@ -65,28 +63,40 @@ class Portfolio:
         
         self.stocks.append(stock)
     
-    def profit(self, date1, date2):
+    def getProfit(self, start_date, end_date):
         """ 
         Devuelve el beneficio del portfolio entre dos fechas.
-        date1 y date2 deben tener el formato "YYYY-MM-DD".
+        start_date y end_date deben tener el formato "YYYY-MM-DD".
         """
 
-        if not check_date(date1) or not check_date(date2):
+        if not check_date(start_date) or not check_date(end_date):
             raise ValueError("Fecha inválida. El formato debe ser 'YYYY-MM-DD'.")
+        
+        profit = 0
+        for stock in self.stocks:
+            start_price = stock.getPrice(start_date)
+            end_price = stock.getPrice(end_date)
+            profit += end_price - start_price
+        
+        return profit
+    
+
+    def getAnnualizedReturn(self, start_date, end_date):
+        """
+        Devuelve el retorno anualizado del portfolio entre dos fechas.
+        start_date y end_date deben tener el formato "YYYY-MM-DD".
+        """
+
+        if not check_date(start_date) or not check_date(end_date):
+            raise ValueError("Fecha inválida. El formato debe ser 'YYYY-MM-DD'.")
+        
 
         profit = 0
         for stock in self.stocks:
-            price1 = stock.getPrice(date1)
-            price2 = stock.getPrice(date2)
-            profit += price2 - price1
+            start_price = stock.getPrice(start_date)
+            end_price = stock.getPrice(end_date)
+            days = (datetime.strptime(end_date, "%Y-%m-%d") - datetime.strptime(start_date, "%Y-%m-%d")).days
+            annualized_return = (end_price / start_price) ** (365 / days) - 1
+            profit += annualized_return
 
-
-while True:
-
-    stock = input("Introduce el nombre del stock: ")
-    stock = Stock(stock)
-    date = input("Introduce la fecha (YYYY-MM-DD): ")
-    stock.getPrice(date)
-
-    input("Presiona Enter para continuar...")
-
+        return profit
